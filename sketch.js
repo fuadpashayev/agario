@@ -3,12 +3,12 @@ let blobs = [];
 var zoom = 1;
 
 function setup() {
-  createCanvas(600, 600);
-  blob = new Blob(0, 0, 64);
+  createCanvas(windowWidth, windowHeight);
+  blob = new Blob(0, 0, 32);
   for(let i = 0; i <= 5000; i++){
-    var x = random(-width * 10, width * 10);
-    var y = random(-height * 10, height * 10);
-    blobs[i] = new Blob(x, y, 16);
+    var x = random(-width * 5, width * 5);
+    var y = random(-height * 5, height * 5);
+    blobs[i] = new Blob(x, y, 8);
   }
 }
 
