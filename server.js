@@ -3,11 +3,28 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const { networkInterfaces } = require('os');
 const io = new Server(server, {
     cors: {
         origin: '*',
     }
 });
+
+const nets = networkInterfaces();
+const results = Object.create(null); // Or just '{}', an empty object
+
+for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+        if (net.family === 'IPv4' && !net.internal) {
+            if (!results[name]) {
+                results[name] = [];
+            }
+            results[name].push(net.address);
+        }
+    }
+}
+
 const colorTool = require('./tools');
 const port = 3000;
 
@@ -28,16 +45,18 @@ io.on('connection', (socket) => {
             id: socket.id,
             ...data
         });
-        let {width, height} = data;
-        if(masses.length <= 0){
+        let { width, height } = data;
+        if (masses.length <= 0) {
             masses = massSpawn(width, height);
         }
         socket.emit('mass-spawn', masses);
     });
-    
+
     socket.on('mass-eaten', massIndex => {
+        let eatenMass = { ...masses[massIndex] };
         masses.splice(massIndex, 1);
         socket.broadcast.emit('mass-spawn', masses);
+        massRespawn(eatenMass, socket);
     });
 
     socket.on('update', data => {
@@ -61,6 +80,15 @@ io.on('connection', (socket) => {
     });
 });
 
+function massRespawn(eatenMass, socket) {
+    eatenMass.x = eatenMass.x + colorTool.rand(-50, 50);
+    eatenMass.y = eatenMass.y + colorTool.rand(-50, 50);
+    setTimeout(() => {
+        masses.push(eatenMass)
+        socket.emit('mass-spawn', masses);
+    }, 4500);
+}
+
 function massSpawn(width, height) {
     let data = [];
     for (let i = 0; i <= 5000; i++) {
@@ -74,5 +102,5 @@ function massSpawn(width, height) {
 }
 
 server.listen(port, () => {
-    console.log('listening on *:' + port);
+    console.log(`listening on http://${results.en0[0]}:${port}`);
 });

@@ -1,35 +1,95 @@
-function Blob(x, y, r, colorr, id = ''){
-    this.pos = createVector(x, y);
-    this.r = r;
-    this.vel = createVector(0, 0);
-    this.color = colorr;
-    this.id = id;
-
-    this.update = function() {
-        var newVel = createVector(mouseX - width / 2, mouseY - height / 2);
-        newVel.setMag(3);
-        this.vel.lerp(newVel, 0.1)
-        this.pos.add(this.vel);
+class Blob {
+    constructor(x, y, r, colorr, id = '') {
+        this.pos = createVector(x, y);
+        this.r = r;
+        this.vel = createVector(0, 0);
+        this.color = colorr;
+        this.id = id;
     }
 
-    this.eats = function(other) {
+    update() {
+        var newVel = createVector(mouseX - width / 2, mouseY - height / 2);
+        newVel.setMag(1.2);
+        this.vel.lerp(newVel, 0.1);
+        this.pos.add(this.vel);
+    };
+
+    eats(other, isBullet = false) {
         var d = p5.Vector.dist(this.pos, other.pos);
-        if(d < this.r + other.r && this.r > other.r * 1.2){
+        if (isBullet) {
+            let bullet = createVector(other.blobX, other.blobY);
+            d = p5.Vector.dist(this.pos, bullet);
+            if(!other.eatable) d += 50;
+        }
+        if (d < this.r + other.r && this.r > other.r * 1.2) {
             var sum = PI * this.r ** 2 + PI * other.r ** 2;
             this.r = sqrt(sum / PI);
             return true;
         }
         return false;
-    }
+    };
 
-    this.constrain = () => {
+    constrain() {
         blob.pos.x = constrain(blob.pos.x, -width * 10, width * 10);
         blob.pos.y = constrain(blob.pos.y, -height * 10, height * 10);
+    };
+
+    show() {
+        if (this.color) {
+            fill(color(this.color));
+            ellipse(this.pos.x, this.pos.y, this.r * 2, this.r * 2);
+            strokeWeight(0);
+        }
+    };
+
+    throw(callback = () => { }) {
+        if (this.r > 20) {
+            this.r -= 1;
+            callback();
+        }
+    };
+}
+
+class Bullet {
+    constructor(mouseX, mouseY, blobX, blobY, colorr) {
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
+        this.blobX = blobX;
+        this.blobY = blobY;
+        this.bulletStopped = false;
+        this.eatable = false;
+
+
+        this.dir = createVector(mouseX - windowWidth / 2, mouseY - windowHeight / 2).normalize()
+        this.pos = this.dir;
+        this.speed = 10;
+        this.r = 12;
+        this.color = colorr;
+
+        blobY - windowHeight / 2
     }
 
-    this.show = function(){
-        fill(color(this.color));
-        ellipse(this.pos.x, this.pos.y, this.r * 2, this.r * 2);
-        strokeWeight(0);
+    show() {
+        if (this.color) {
+            fill(color(this.color));
+            circle(this.blobX, this.blobY, this.r * 2);
+            strokeWeight(0);
+            this.toMouse();
+        }
+    };
+
+    toMouse() {
+        this.blobX += this.dir.x * this.speed;
+        this.blobY += this.dir.y * this.speed;
+        this.dir.x = lerp(this.dir.x, 0, 0.05);
+        this.dir.y = lerp(this.dir.y, 0, 0.05);
+        console.log({ lolo: Math.abs(this.dir.x) })
+        if (Math.abs(this.dir.x) <= 0.001 && !this.eatable) this.eatable = true;
     }
 }
+
+
+
+            // this.blobX += this.mouseX < windowWidth / 2 ? -50 : 50;
+            // this.blobY += this.mouseY < windowHeight / 2 ? -50 : 50;
+            // console.log(this.dir);

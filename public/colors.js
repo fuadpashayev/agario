@@ -106,7 +106,7 @@ const colors = [
     '#00ACC1',
     '#0097A7',
     '#00838F',
-    '#6064',
+    '#606466',
     '#84FFFF',
     '#18FFFF',
     '#00E5FF',
@@ -116,7 +116,7 @@ const colors = [
     '#80CBC4',
     '#4DB6AC',
     '#26A69A',
-    '#9688',
+    '#968888',
     '#00897B',
     '#00796B',
     '#00695C',
@@ -257,5 +257,5 @@ const colors = [
 ];
 
 function randomColor() {
-    return colors[int(random(0, 255))];
+    return colors[int(random(0, 254))];
 }
