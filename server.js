@@ -36,6 +36,7 @@ app.get('/', (req, res) => {
 
 let blobs = [];
 let masses = [];
+let bullets = [];
 
 io.on('connection', (socket) => {
     console.log('a user connected');
@@ -55,8 +56,8 @@ io.on('connection', (socket) => {
     socket.on('mass-eaten', massIndex => {
         let eatenMass = { ...masses[massIndex] };
         masses.splice(massIndex, 1);
-        socket.broadcast.emit('mass-spawn', masses);
-        massRespawn(eatenMass, socket);
+        socket.broadcast.emit('mass-eaten', massIndex);
+        massRespawn(eatenMass, socket, massIndex);
     });
 
     socket.on('update', data => {
@@ -74,6 +75,11 @@ io.on('connection', (socket) => {
         blobs = blobs.filter(blob => blob.id !== socketId);
     });
 
+    socket.on('bullet', bulletData => {
+        bullets.push(bulletData);
+        socket.broadcast.emit('bullet', bulletData);
+    });
+
     socket.on('disconnect', () => {
         socket.broadcast.emit('eaten', socket.id);
         blobs = blobs.filter(blob => blob.id !== socket.id);
@@ -81,11 +87,12 @@ io.on('connection', (socket) => {
 });
 
 function massRespawn(eatenMass, socket) {
-    eatenMass.x = eatenMass.x + colorTool.rand(-50, 50);
-    eatenMass.y = eatenMass.y + colorTool.rand(-50, 50);
+    eatenMass.x = eatenMass.x + colorTool.rand(-100, 100);
+    eatenMass.y = eatenMass.y + colorTool.rand(-100, 100);
+
     setTimeout(() => {
-        masses.push(eatenMass)
-        socket.emit('mass-spawn', masses);
+        masses.push(eatenMass);
+        socket.emit('mass-respawn', eatenMass);
     }, 4500);
 }
 

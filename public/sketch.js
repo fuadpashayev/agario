@@ -26,12 +26,20 @@ function setup() {
     }
   });
 
+  socket.on('mass-respawn', massData => {
+    let { x, y, r, color } = massData;
+    masses.push(new Blob(x, y, r, color));
+  });
+
+  socket.on('mass-eaten', massIndex => masses.splice(massIndex, 1));
+  socket.on('mass-eaten', massIndex => masses.splice(massIndex, 1));
+
   socket.on('update', blobList => {
     blobs = [];
     for (let i = 0; i < blobList.length; i++) {
-      let opponentBlob = blobList[i];
-      if (opponentBlob.id !== socket.id) {
-        blobs.push(new Blob(opponentBlob.x, opponentBlob.y, opponentBlob.r, opponentBlob.color, opponentBlob.id));
+      let {x, y, r, color, id} = blobList[i];
+      if (id !== socket.id) {
+        blobs.push(new Blob(x, y, r, color, id));
       }
     }
   });
@@ -40,7 +48,7 @@ function setup() {
     blobs = blobs.filter(opponentBlob => opponentBlob.id !== socketId);
     if (socket.id === socketId) {
       blob = null;
-      
+
       tata.error('Eliminated', 'You are eaten :(')
       console.log('you are eaten')
     }
@@ -50,7 +58,7 @@ function setup() {
 function draw() {
   background(255);
   translate(width / 2, height / 2);
-  if(blob){
+  if (blob) {
     var newZoom = 32 / blob.r;
     zoom = lerp(zoom, newZoom, 0.1);
     scale(zoom);
@@ -84,7 +92,7 @@ function draw() {
     }
   }
 
-  if(blob){
+  if (blob) {
     blob.show();
     blob.update();
     blob.constrain();
@@ -96,16 +104,18 @@ function keyPressed() {
   const W_KEY = 87;
   const SPACE_KEY = 32;
 
-  switch(keyCode){
+  switch (keyCode) {
     case W_KEY:
       blob.throw(blobThrow);
-    break;
+      break;
   }
 }
 
 
 function blobThrow() {
-  let bullet = new Bullet(mouseX, mouseY, blob.pos.x, blob.pos.y, blob.color);
+  let [x, y, c] = [blob.pos.x, blob.pos.y, blob.color];
+  let bullet = new Bullet(x, y, c);
   bullets.push(bullet);
   blob.throw();
+  socket.emit('bullet', {x, y, c});
 }
