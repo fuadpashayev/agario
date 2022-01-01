@@ -32,12 +32,19 @@ function setup() {
   });
 
   socket.on('mass-eaten', massIndex => masses.splice(massIndex, 1));
-  socket.on('mass-eaten', massIndex => masses.splice(massIndex, 1));
+
+  socket.on('bullet-eaten', bulletIndex => bullets.splice(bulletIndex, 1));
+
+  socket.on('bullet', bulletData => {
+    let {x, y, mX, mY, c} = bulletData;
+    let bullet = new Bullet(x, y, mX, mY, c);
+    bullets.push(bullet);
+  });
 
   socket.on('update', blobList => {
     blobs = [];
     for (let i = 0; i < blobList.length; i++) {
-      let {x, y, r, color, id} = blobList[i];
+      let { x, y, r, color, id } = blobList[i];
       if (id !== socket.id) {
         blobs.push(new Blob(x, y, r, color, id));
       }
@@ -78,7 +85,7 @@ function draw() {
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullets[i].show();
     if (blob?.eats(bullets[i], true)) {
-      socket.emit('mass-eaten', i);
+      socket.emit('bullet-eaten', i);
       bullets.splice(i, 1);
     }
   }
@@ -113,9 +120,10 @@ function keyPressed() {
 
 
 function blobThrow() {
-  let [x, y, c] = [blob.pos.x, blob.pos.y, blob.color];
-  let bullet = new Bullet(x, y, c);
+  let [x, y, mX, mY, c] = [blob.pos.x, blob.pos.y, mouseX, mouseY, blob.color];
+  let bullet = new Bullet(x, y, mouseX, mouseY, c);
   bullets.push(bullet);
   blob.throw();
-  socket.emit('bullet', {x, y, c});
+  socket.emit('bullet', { x, y, mX, mY, c });
+  console.log({bullet, bullets})
 }

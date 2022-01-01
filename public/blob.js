@@ -9,18 +9,18 @@ class Blob {
 
     update() {
         var newVel = createVector(mouseX - width / 2, mouseY - height / 2);
-        newVel.setMag(1.001);
+        newVel.setMag(1.5);
         this.vel.lerp(newVel, 0.1);
         this.pos.add(this.vel);
     };
 
     eats(other, isBullet = false) {
-        var d = p5.Vector.dist(this.pos, other.pos);
+        let d;
         if (isBullet) {
             let bullet = createVector(other.blobX, other.blobY);
             d = p5.Vector.dist(this.pos, bullet);
             if(!other.eatable) d += 50;
-        }
+        }else d = p5.Vector.dist(this.pos, other.pos);
         if (d < this.r + other.r && this.r > other.r * 1.2) {
             var sum = PI * this.r ** 2 + PI * other.r ** 2;
             this.r = sqrt(sum / PI);

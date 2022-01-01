@@ -1,18 +1,16 @@
 class Bullet {
-    constructor(blobX, blobY, colorr) {
+    speed = 20;
+    r = 12;
+    eatable = false;
+
+    constructor(blobX, blobY, mX, mY, colorr) {
         this.blobX = blobX;
         this.blobY = blobY;
-        this.bulletStopped = false;
-        this.eatable = false;
+        this.mX = mX;
+        this.mY = mY;
 
-
-        this.dir = createVector(mouseX - windowWidth / 2, mouseY - windowHeight / 2).normalize()
-        this.pos = this.dir;
-        this.speed = 10;
-        this.r = 12;
+        this.dir = createVector(this.mX - windowWidth / 2, this.mY - windowHeight / 2).normalize();
         this.color = colorr;
-
-        blobY - windowHeight / 2
     }
 
     show() {
@@ -26,9 +24,8 @@ class Bullet {
     toMouse() {
         this.blobX += this.dir.x * this.speed;
         this.blobY += this.dir.y * this.speed;
-        this.dir.x = lerp(this.dir.x, 0, 0.05);
-        this.dir.y = lerp(this.dir.y, 0, 0.05);
-        console.log({ lolo: Math.abs(this.dir.x) })
+        this.dir.x = lerp(this.dir.x, 0, 0.08);
+        this.dir.y = lerp(this.dir.y, 0, 0.08);
         if (Math.abs(this.dir.x) <= 0.001 && !this.eatable) this.eatable = true;
     }
 }

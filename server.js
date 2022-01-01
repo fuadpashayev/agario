@@ -60,6 +60,11 @@ io.on('connection', (socket) => {
         massRespawn(eatenMass, socket, massIndex);
     });
 
+    socket.on('bullet-eaten', bulletIndex => {
+        bullets.splice(bulletIndex, 1);
+        socket.broadcast.emit('bullet-eaten', bulletIndex);
+    });
+
     socket.on('update', data => {
         let blob = blobs.find(blob => blob.id === data.id);
         if (blob) {
