@@ -36,7 +36,7 @@ function setup() {
   socket.on('bullet-eaten', bulletIndex => bullets.splice(bulletIndex, 1));
 
   socket.on('bullet', bulletData => {
-    let {x, y, mX, mY, c} = bulletData;
+    let { x, y, mX, mY, c } = bulletData;
     let bullet = new Bullet(x, y, mX, mY, c);
     bullets.push(bullet);
   });
@@ -55,9 +55,7 @@ function setup() {
     blobs = blobs.filter(opponentBlob => opponentBlob.id !== socketId);
     if (socket.id === socketId) {
       blob = null;
-
       tata.error('Eliminated', 'You are eaten :(')
-      console.log('you are eaten')
     }
   });
 }
@@ -74,30 +72,7 @@ function draw() {
     socket.emit('update', { id: socket.id, x, y, r, color });
   }
 
-  for (let i = masses.length - 1; i >= 0; i--) {
-    masses[i].show();
-    if (blob?.eats(masses[i])) {
-      socket.emit('mass-eaten', i);
-      masses.splice(i, 1);
-    }
-  }
-
-  for (let i = bullets.length - 1; i >= 0; i--) {
-    bullets[i].show();
-    if (blob?.eats(bullets[i], true)) {
-      socket.emit('bullet-eaten', i);
-      bullets.splice(i, 1);
-    }
-  }
-
-  for (let i = blobs.length - 1; i >= 0; i--) {
-    const opponentBlob = blobs[i];
-    opponentBlob.show();
-    if (blob?.eats(opponentBlob)) {
-      socket.emit('eaten', opponentBlob.id);
-      blobs.splice(i, 1);
-    }
-  }
+  renderObjects();
 
   if (blob) {
     blob.show();
@@ -106,6 +81,79 @@ function draw() {
   }
 }
 
+function renderObjects() {
+  let particles = blob.particles;
+  let cycleCount = Math.max(blobs.length, masses.length, bullets.length, particles.length);
+  for (let i = cycleCount - 1; i >= 0; i--) {
+    const opponentBlob = blobs?.[i];
+    const mass = masses?.[i];
+    const bullet = bullets?.[i];
+    let particle = particles?.[i];
+
+    if (opponentBlob) {
+      opponentBlob.show();
+      if (blob?.eats(opponentBlob)) {
+        socket.emit('eaten', opponentBlob.id);
+        blobs.splice(i, 1);
+      }
+    }
+
+    if (mass) {
+      mass.show();
+      if (blob?.eats(mass)) {
+        socket.emit('mass-eaten', i);
+        masses.splice(i, 1);
+      }
+    }
+
+    if (bullet) {
+      bullet.show();
+      if (blob?.eats(bullet, true)) {
+        socket.emit('bullet-eaten', i);
+        bullets.splice(i, 1);
+      }
+    }
+
+    if(particle){
+      particle.show();
+      particle.update();
+    }
+
+    for (let a = particles.length - 1; a >= 0; a--) {
+      let particleItem = particles[a];
+      if (opponentBlob && particleItem?.eats(opponentBlob)) {
+        socket.emit('eaten', opponentBlob.id);
+        blobs.splice(i, 1);
+      }
+      if (mass && particleItem?.eats(mass)) {
+        socket.emit('mass-eaten', i);
+        masses.splice(i, 1);
+      }
+      if (bullet && particleItem?.eats(bullet, true)) {
+        socket.emit('bullet-eaten', i);
+        bullets.splice(i, 1);
+      }
+    }
+
+  }
+}
+
+function blobThrow() {
+  let [x, y, mX, mY, c] = [blob.pos.x, blob.pos.y, mouseX, mouseY, blob.color];
+  let bullet = new Bullet(x, y, mX, mY, c);
+  bullets.push(bullet);
+  blob.checkCanThrow();
+  socket.emit('bullet', { x, y, mX, mY, c });
+}
+
+function blobSplit(newRadius) {
+  let [x, y, mX, mY, c] = [blob.pos.x, blob.pos.y, mouseX, mouseY, blob.color];
+  let particle = new Particle(x, y, mX, mY, newRadius, c);
+  blob.particles.push(particle);
+  console.log(blob.particles, blob)
+  // blob.checkCanThrow();
+  // socket.emit('bullet', { x, y, mX, mY, c });
+}
 
 function keyPressed() {
   const W_KEY = 87;
@@ -113,17 +161,11 @@ function keyPressed() {
 
   switch (keyCode) {
     case W_KEY:
-      blob.throw(blobThrow);
+      blob.checkCanThrow(blobThrow);
+      break;
+      
+      case SPACE_KEY:
+      blob.checkCanSplit(blobSplit);
       break;
   }
-}
-
-
-function blobThrow() {
-  let [x, y, mX, mY, c] = [blob.pos.x, blob.pos.y, mouseX, mouseY, blob.color];
-  let bullet = new Bullet(x, y, mouseX, mouseY, c);
-  bullets.push(bullet);
-  blob.throw();
-  socket.emit('bullet', { x, y, mX, mY, c });
-  console.log({bullet, bullets})
 }

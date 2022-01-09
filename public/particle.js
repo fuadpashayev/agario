@@ -1,21 +1,16 @@
-class Blob {
-    vel = createVector(0, 0);
+class Particle {
+    speed = 1;
     particles = [];
-    constructor(x, y, r, blobColor, id = '') {
+    constructor(x, y, mX, mY, r, blobColor) {
         this.pos = createVector(x, y);
+        this.blobPos = {x, y};
+        this.mX = mX;
+        this.mY = mY;
         this.r = r;
         this.color = blobColor;
-        this.id = id;
+        this.vel = createVector(this.mX - windowWidth / 2, this.mY - windowHeight / 2).normalize();
     }
-    
-    show() {
-        if (this.color) {
-            fill(color(this.color));
-            circle(this.pos.x, this.pos.y, this.r * 2);
-            strokeWeight(0);
-        }
-    };
-    
+
     update() {
         var newVel = createVector(mouseX - width / 2, mouseY - height / 2);
         newVel.setMag(3);
@@ -39,19 +34,26 @@ class Blob {
         blob.pos.y = constrain(blob.pos.y, -height * 10, height * 10);
     };
 
+    show() {
+        if (this.color) {
+            fill(color(this.color));
+            circle(this.pos.x, this.pos.y, this.r * 2);
+            this.toMouse();
+        }
+    };
+
+    toMouse() {
+        this.pos.x += this.vel.x * this.speed;
+        this.pos.y += this.vel.y * this.speed;
+        this.vel.x = lerp(this.vel.x, 0, 0.08);
+        this.vel.y = lerp(this.vel.y, 0, 0.08);
+        // if (Math.abs(this.dir.x) <= 0.001 && !this.eatable) this.eatable = true;
+    }
 
     checkCanThrow(callback = () => { }) {
         if (this.r > 20) {
             this.r -= 1;
             callback();
-        }
-    };
-
-    checkCanSplit(callback = () => { }) {
-        if (this.r > 20) {
-            let newRadius = this.r / 2;
-            this.r = newRadius;
-            callback(newRadius);
         }
     };
 }
