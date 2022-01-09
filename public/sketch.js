@@ -4,6 +4,7 @@ let blobs = [];
 let bullets = [];
 let zoom = 1;
 let socket;
+let score = 0;
 
 function setup() {
   socket = io.connect();
@@ -64,21 +65,43 @@ function draw() {
   background(255);
   translate(width / 2, height / 2);
   if (blob) {
-    var newZoom = 32 / blob.r;
-    zoom = lerp(zoom, newZoom, 0.1);
+    var newZoom = 40 / blob.r;
+    zoom = lerp(zoom, newZoom, 0.05);
     scale(zoom);
     translate(-blob.pos.x, -blob.pos.y);
     let { pos: { x, y }, r, color } = blob;
     socket.emit('update', { id: socket.id, x, y, r, color });
   }
 
+  renderGrid();
   renderObjects();
-
+  
   if (blob) {
-    blob.show();
+    blob.show(score);
     blob.update();
     blob.constrain();
   }
+}
+
+function renderGrid() {
+  stroke(200);
+  strokeWeight(0.1);
+
+  beginShape();
+
+  for (var i = -height * 5; i <= height * 5; i++) {
+    vertex(-width * 5, i * 30);
+    vertex(windowHeight * 10, i * 30);
+    vertex(-width * 5, i * 30);
+  }
+
+  for (var i = -width * 5; i <= width * 5; i++) {
+    vertex(i * 30, -height * 5);
+    vertex(i * 30, windowWidth * 10);
+    vertex(i * 30, -height * 5);
+  }
+
+  endShape();
 }
 
 function renderObjects() {
@@ -95,6 +118,7 @@ function renderObjects() {
       if (blob?.eats(opponentBlob)) {
         socket.emit('eaten', opponentBlob.id);
         blobs.splice(i, 1);
+        score += 5;
       }
     }
 
@@ -103,6 +127,7 @@ function renderObjects() {
       if (blob?.eats(mass)) {
         socket.emit('mass-eaten', i);
         masses.splice(i, 1);
+        score += 1;
       }
     }
 
@@ -114,7 +139,7 @@ function renderObjects() {
       }
     }
 
-    if(particle){
+    if (particle) {
       particle.show();
       particle.update();
     }
@@ -163,8 +188,8 @@ function keyPressed() {
     case W_KEY:
       blob.checkCanThrow(blobThrow);
       break;
-      
-      case SPACE_KEY:
+
+    case SPACE_KEY:
       blob.checkCanSplit(blobSplit);
       break;
   }

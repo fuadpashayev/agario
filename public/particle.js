@@ -1,5 +1,5 @@
 class Particle {
-    speed = 1;
+    speed = 0.72;
     particles = [];
     constructor(x, y, mX, mY, r, blobColor) {
         this.pos = createVector(x, y);
@@ -30,8 +30,8 @@ class Particle {
     };
 
     constrain() {
-        blob.pos.x = constrain(blob.pos.x, -width * 10, width * 10);
-        blob.pos.y = constrain(blob.pos.y, -height * 10, height * 10);
+        blob.pos.x = constrain(blob.pos.x, -width * 5, width * 5);
+        blob.pos.y = constrain(blob.pos.y, -height * 5, height * 5);
     };
 
     show() {

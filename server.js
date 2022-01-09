@@ -104,8 +104,8 @@ function massRespawn(eatenMass, socket) {
 function massSpawn(width, height) {
     let data = [];
     for (let i = 0; i <= 5000; i++) {
-        const x = colorTool.rand(-width * 10, width * 10);
-        const y = colorTool.rand(-height * 10, height * 10);
+        const x = colorTool.rand(-width * 5, width * 5);
+        const y = colorTool.rand(-height * 5, height * 5);
         const r = 8;
         const color = colorTool.randomColor();
         data[i] = { x, y, r, color };

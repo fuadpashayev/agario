@@ -8,11 +8,18 @@ class Blob {
         this.id = id;
     }
     
-    show() {
+    show(score = null) {
         if (this.color) {
             fill(color(this.color));
             circle(this.pos.x, this.pos.y, this.r * 2);
-            strokeWeight(0);
+            strokeWeight(0.5);
+            stroke(255);
+            if(score){
+                textSize(14 - ((32 - this.r) / 3));
+                fill(255);
+                text(score, this.pos.x, this.pos.y);
+                textAlign(CENTER, CENTER);
+            }
         }
     };
     
@@ -35,8 +42,8 @@ class Blob {
     };
 
     constrain() {
-        blob.pos.x = constrain(blob.pos.x, -width * 10, width * 10);
-        blob.pos.y = constrain(blob.pos.y, -height * 10, height * 10);
+        blob.pos.x = constrain(blob.pos.x, -width * 5, width * 5);
+        blob.pos.y = constrain(blob.pos.y, -height * 5, height * 5);
     };
 
 
