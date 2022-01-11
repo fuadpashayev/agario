@@ -89,7 +89,7 @@ function renderGrid() {
 
   beginShape();
 
-  for (var i = -height * 5; i <= height * 5; i++) {
+  for (var i = -height * 1; i <= height * 1; i++) {
     vertex(-width * 5, i * 30);
     vertex(windowHeight * 10, i * 30);
     vertex(-width * 5, i * 30);
