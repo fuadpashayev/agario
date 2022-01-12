@@ -118,7 +118,7 @@ function renderObjects() {
       if (blob?.eats(opponentBlob)) {
         socket.emit('eaten', opponentBlob.id);
         blobs.splice(i, 1);
-        score += 5;
+        score += 15;
       }
     }
 
@@ -127,7 +127,7 @@ function renderObjects() {
       if (blob?.eats(mass)) {
         socket.emit('mass-eaten', i);
         masses.splice(i, 1);
-        score += 1;
+        score += 3;
       }
     }
 
@@ -140,8 +140,8 @@ function renderObjects() {
     }
 
     if (particle) {
-      particle.show();
-      particle.update();
+      particle.show(blob);
+      particle.update(blob);
     }
 
     for (let a = particles.length - 1; a >= 0; a--) {
